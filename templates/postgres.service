@@ -1,0 +1,22 @@
+[Unit]
+Description={{ postgres_description }}
+After=registrator.service
+Requires=registrator.service
+Requires=consul.service
+
+[Service]
+Restart=on-failure
+
+ExecStart=/bin/bash -c \
+    "/bin/docker start -a {{ postgres_service_name }} \
+    || /bin/docker run \
+    --name {{ postgres_service_name }} \
+    -p {{ private_ip }}:{{ host_port_bind }}:5432 \
+    {{ postgres_image }}
+
+ExecStop=/bin/bash -c \
+    "/bin/docker stop {{ postgres_service_name }} \
+    && /bin/docker rm {{ postgres_service_name }}"
+
+[Install]
+WantedBy=multi-user.target

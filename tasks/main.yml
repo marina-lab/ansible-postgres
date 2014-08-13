@@ -1,0 +1,21 @@
+# Dockerized Postgres
+ - name: pull postgres image
+   docker_pull:
+     repo: "{{ postgres_image }}"
+
+ - name: "template {{ postgres_service_name }}.service"
+   template:
+     src: postgres.service
+     dest: "/usr/lib/systemd/system/{{ postgres_service_name }}.service"
+   register: postgres_unit
+   notify: "restart {{ postgres_service_name }}"
+
+ - name: systemctl daemon-reload
+   command: /bin/systemctl daemon-reload
+   when: postgres_unit.changed
+
+ - name: "enable and start {{ postgres_service_name }}.service"
+   service:
+     name: "{{ postgres_service_name }}"
+     enabled: yes
+     state: started
